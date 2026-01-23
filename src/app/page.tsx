@@ -2,9 +2,14 @@ import ModeToggle from "@/components/ModeToggle";
 import WhyButton from "@/components/WhyButton";
 import { db } from "@/lib/firebaseAdmin";
 
+import ModeToggle from "@/components/ModeToggle";
+import WhyButton from "@/components/WhyButton";
+import { db } from "@/lib/firebaseAdmin";
+
 // Force le rendu dynamique pour éviter le pré-rendu statique au build
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const fetchCache = "force-no-store";
 
 function getParisDateString(date: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
