@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import WhyButton from "@/components/WhyButton";
 
 type DailyData = {
   joke: string;
   fact: string;
   sourceUrl: string;
+  status: "ok" | "loading" | "error";
 };
 
 type Props = {
@@ -16,8 +18,14 @@ type Props = {
 export default function ModeToggle({ general, dev }: Props) {
   const [mode, setMode] = useState<"general" | "dev">("general");
   const data = mode === "general" ? general : dev;
+  const isReady = data.status === "ok" && data.joke && data.fact;
+  const statusMessage =
+    data.status === "error"
+      ? "Impossible de charger pour l’instant."
+      : "Contenu en cours de préparation…";
 
   const handleShare = async () => {
+    if (!isReady) return;
     const text = `${data.joke}\n\n${data.fact}\n\nSource: ${data.sourceUrl}`;
     const url = window.location.href;
     const title = "Inutile donc indispensable";
@@ -47,81 +55,76 @@ export default function ModeToggle({ general, dev }: Props) {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          gap: "8px",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="segmented">
         <button
           onClick={() => setMode("general")}
           aria-pressed={mode === "general"}
-          style={{
-            padding: "8px 16px",
-            border: "1px solid #ccc",
-            background: mode === "general" ? "#000" : "#fff",
-            color: mode === "general" ? "#fff" : "#000",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
+          className={`segmentedButton ${
+            mode === "general" ? "segmentedButtonActive" : ""
+          }`}
         >
           Grand public
         </button>
         <button
           onClick={() => setMode("dev")}
           aria-pressed={mode === "dev"}
-          style={{
-            padding: "8px 16px",
-            border: "1px solid #ccc",
-            background: mode === "dev" ? "#000" : "#fff",
-            color: mode === "dev" ? "#fff" : "#000",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
+          className={`segmentedButton ${
+            mode === "dev" ? "segmentedButtonActive" : ""
+          }`}
         >
           Mode Dev 🤓
         </button>
       </div>
 
-      <div style={{ marginBottom: "24px" }}>
-        <h2 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>
-          Blague du jour
-        </h2>
-        <p style={{ fontSize: "1.1rem", lineHeight: "1.6" }}>{data.joke}</p>
+      {!isReady ? (
+        <div className="skeletonWrap">
+          <div className="section">
+            <div className="skeletonTitle" />
+            <div className="skeletonLine" />
+            <div className="skeletonLine short" />
+          </div>
+          <div className="section">
+            <div className="skeletonTitle" />
+            <div className="skeletonLine" />
+            <div className="skeletonLine short" />
+          </div>
+          <p className="statusMessage">{statusMessage}</p>
+        </div>
+      ) : (
+        <>
+          <div className="section">
+            <h2 className="sectionTitle">Blague du jour</h2>
+            <p className="sectionText">{data.joke}</p>
+          </div>
+
+          <div className="section">
+            <h2 className="sectionTitle">Info inutile</h2>
+            <p className="sectionText">{data.fact}</p>
+            <p className="sourceWrap">
+              <a
+                href={data.sourceUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="sourceLink"
+              >
+                Source
+              </a>
+            </p>
+          </div>
+        </>
+      )}
+
+      <div className="actions">
+        <button
+          onClick={handleShare}
+          className="shareButton"
+          disabled={!isReady}
+        >
+          Partager
+        </button>
       </div>
 
-      <div style={{ marginBottom: "24px" }}>
-        <h2 style={{ fontSize: "1.5rem", marginBottom: "12px" }}>
-          Info inutile
-        </h2>
-        <p style={{ fontSize: "1.1rem", lineHeight: "1.6" }}>{data.fact}</p>
-        <p style={{ marginTop: "8px" }}>
-          <a
-            href={data.sourceUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            style={{ color: "#0066cc", textDecoration: "underline" }}
-          >
-            Source
-          </a>
-        </p>
-      </div>
-
-      <button
-        onClick={handleShare}
-        style={{
-          padding: "10px 20px",
-          background: "#0066cc",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-          fontSize: "1rem",
-        }}
-      >
-        Partager
-      </button>
+      <WhyButton mode={mode} />
     </div>
   );
 }

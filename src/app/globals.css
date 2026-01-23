@@ -1,0 +1,244 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f7f7f8;
+  color: #18181b;
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #71717a;
+  margin: 0;
+}
+
+.segmented {
+  display: flex;
+  gap: 8px;
+  background: #f4f4f5;
+  border-radius: 999px;
+  padding: 6px;
+  margin-bottom: 24px;
+  flex-direction: column;
+}
+
+.segmentedButton {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #52525b;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 500;
+  width: 100%;
+}
+
+.segmentedButtonActive {
+  background: #18181b;
+  color: #ffffff;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.sectionText {
+  font-size: 16px;
+  color: #27272a;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.sourceWrap {
+  margin-top: 8px;
+}
+
+.sourceLink {
+  font-size: 14px;
+  color: #52525b;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.sourceLink:hover {
+  color: #18181b;
+  border-bottom-color: #18181b;
+}
+
+.actions {
+  margin: 8px 0 16px;
+}
+
+.shareButton {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.shareButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.shareButton:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.whyWrap {
+  margin-top: 16px;
+  border-top: 1px solid #e4e4e7;
+  padding-top: 16px;
+}
+
+.whyButton {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e4e4e7;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 14px;
+  color: #27272a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.whyPanel {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 200ms ease, opacity 200ms ease;
+}
+
+.whyPanel.open {
+  max-height: 200px;
+  opacity: 1;
+}
+
+.whyText {
+  margin: 12px 0 0;
+  padding: 12px;
+  background: #f4f4f5;
+  border-radius: 12px;
+  color: #3f3f46;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.skeletonWrap {
+  margin-bottom: 12px;
+}
+
+.skeletonTitle {
+  height: 18px;
+  width: 140px;
+  border-radius: 999px;
+  background: #e4e4e7;
+  margin-bottom: 12px;
+}
+
+.skeletonLine {
+  height: 14px;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e4e4e7 25%, #f4f4f5 50%, #e4e4e7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  margin-bottom: 10px;
+}
+
+.skeletonLine.short {
+  width: 70%;
+}
+
+.statusMessage {
+  font-size: 14px;
+  color: #71717a;
+  margin: 0;
+}
+
+.footer {
+  margin-top: 24px;
+  font-size: 13px;
+  color: #a1a1aa;
+  text-align: center;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@media (min-width: 640px) {
+  .page {
+    padding: 40px 24px;
+  }
+
+  .card {
+    padding: 32px;
+  }
+
+  .segmented {
+    flex-direction: row;
+  }
+
+  .segmentedButton {
+    width: auto;
+    flex: 1;
+  }
+
+  .shareButton {
+    width: auto;
+  }
+}

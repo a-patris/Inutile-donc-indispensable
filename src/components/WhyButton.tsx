@@ -1,41 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-export default function WhyButton() {
+type Props = {
+  mode: "general" | "dev";
+};
+
+const COPY = {
+  general:
+    "Parce qu’une blague et une info inutile suffisent parfois à améliorer la journée.",
+  dev:
+    "Parce qu’un fait inutile et un clin d’œil tech peuvent rendre le quotidien plus léger.",
+};
+
+export default function WhyButton({ mode }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const content = useMemo(() => COPY[mode], [mode]);
 
   return (
-    <div style={{ marginTop: "32px", paddingTop: "24px", borderTop: "1px solid #eee" }}>
+    <div className="whyWrap">
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
-        style={{
-          padding: "8px 16px",
-          background: "transparent",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-          cursor: "pointer",
-          fontSize: "0.9rem",
-        }}
+        className="whyButton"
       >
-        Pourquoi ce site existe ? {isOpen ? "−" : "+"}
+        Pourquoi ce site existe ? <span aria-hidden="true">{isOpen ? "−" : "+"}</span>
       </button>
-      {isOpen && (
-        <p
-          style={{
-            marginTop: "12px",
-            padding: "12px",
-            background: "#f5f5f5",
-            borderRadius: "4px",
-            lineHeight: "1.6",
-          }}
-        >
-          Parce que parfois, une blague et un fait inutile suffisent à améliorer
-          la journée. Parce que le savoir inutile est le plus précieux. Parce
-          que rire et apprendre ne devraient jamais être optionnels.
-        </p>
-      )}
+      <div
+        className={`whyPanel ${isOpen ? "open" : ""}`}
+        aria-hidden={!isOpen}
+      >
+        <p className="whyText">{content}</p>
+      </div>
     </div>
   );
 }
