@@ -2,6 +2,10 @@ import ModeToggle from "@/components/ModeToggle";
 import WhyButton from "@/components/WhyButton";
 import { db } from "@/lib/firebaseAdmin";
 
+// Force le rendu dynamique pour éviter le pré-rendu statique au build
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 function getParisDateString(date: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Paris",
@@ -15,23 +19,32 @@ async function getDailyData(
   mode: "general" | "dev",
   dateStr: string
 ): Promise<{ joke: string; fact: string; sourceUrl: string }> {
-  const docId = `${dateStr}_${mode}`;
-  const docSnap = await db.collection("daily").doc(docId).get();
+  try {
+    const docId = `${dateStr}_${mode}`;
+    const docSnap = await db.collection("daily").doc(docId).get();
 
-  if (!docSnap.exists) {
+    if (!docSnap.exists) {
+      return {
+        joke: "En cours de génération...",
+        fact: "En cours de génération...",
+        sourceUrl: "#",
+      };
+    }
+
+    const data = docSnap.data()!;
     return {
-      joke: "En cours de génération...",
-      fact: "En cours de génération...",
+      joke: data.joke || "",
+      fact: data.fact || "",
+      sourceUrl: data.sourceUrl || "#",
+    };
+  } catch (error) {
+    console.error(`Error fetching daily data for ${mode}:`, error);
+    return {
+      joke: "Erreur de chargement...",
+      fact: "Erreur de chargement...",
       sourceUrl: "#",
     };
   }
-
-  const data = docSnap.data()!;
-  return {
-    joke: data.joke || "",
-    fact: data.fact || "",
-    sourceUrl: data.sourceUrl || "#",
-  };
 }
 
 export default async function HomePage() {
