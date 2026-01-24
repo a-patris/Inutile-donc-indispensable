@@ -204,6 +204,28 @@ body {
   margin: 0;
 }
 
+.errorBox {
+  border: 1px solid #e4e4e7;
+  background: #fafafa;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.errorTitle {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #27272a;
+}
+
+.errorText {
+  margin: 0;
+  font-size: 14px;
+  color: #71717a;
+  line-height: 1.5;
+}
+
 .footer {
   margin-top: 24px;
   font-size: 13px;

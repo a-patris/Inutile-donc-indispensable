@@ -19,10 +19,11 @@ export default function ModeToggle({ general, dev }: Props) {
   const [mode, setMode] = useState<"general" | "dev">("general");
   const data = mode === "general" ? general : dev;
   const isReady = data.status === "ok" && data.joke && data.fact;
-  const statusMessage =
-    data.status === "error"
-      ? "Impossible de charger pour l’instant."
-      : "Contenu en cours de préparation…";
+  const isLoading = data.status === "loading";
+  const isError = data.status === "error";
+  const statusMessage = "Contenu en cours de préparation…";
+  const errorMessage =
+    "Pas encore de contenu pour aujourd’hui. Réessaie un peu plus tard.";
 
   const handleShare = async () => {
     if (!isReady) return;
@@ -74,7 +75,7 @@ export default function ModeToggle({ general, dev }: Props) {
         </button>
       </div>
 
-      {!isReady ? (
+      {isLoading ? (
         <div className="skeletonWrap">
           <div className="section">
             <div className="skeletonTitle" />
@@ -87,6 +88,11 @@ export default function ModeToggle({ general, dev }: Props) {
             <div className="skeletonLine short" />
           </div>
           <p className="statusMessage">{statusMessage}</p>
+        </div>
+      ) : isError ? (
+        <div className="errorBox">
+          <p className="errorTitle">Oups, rien pour l’instant</p>
+          <p className="errorText">{errorMessage}</p>
         </div>
       ) : (
         <>

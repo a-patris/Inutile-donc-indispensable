@@ -14,7 +14,16 @@ type DailyData = {
   status: "ok" | "loading" | "error";
 };
 
-function getParisDateString(date: Date = new Date()): string {
+function getParisDateKey(date: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function getParisDateLabel(date: Date = new Date()): string {
   const formatted = new Intl.DateTimeFormat("fr-FR", {
     timeZone: "Europe/Paris",
     weekday: "long",
@@ -38,7 +47,7 @@ async function getDailyData(
         joke: "",
         fact: "",
         sourceUrl: "",
-        status: "loading",
+        status: "error",
       };
     }
 
@@ -61,10 +70,11 @@ async function getDailyData(
 }
 
 export default async function HomePage() {
-  const dateStr = getParisDateString();
+  const dateKey = getParisDateKey();
+  const dateLabel = getParisDateLabel();
   const [general, dev] = await Promise.all([
-    getDailyData("general", dateStr),
-    getDailyData("dev", dateStr),
+    getDailyData("general", dateKey),
+    getDailyData("dev", dateKey),
   ]);
 
   return (
@@ -72,7 +82,7 @@ export default async function HomePage() {
       <div className="card">
         <header className="header">
           <h1 className="title">Inutile donc indispensable</h1>
-          <p className="subtitle">Édition du {dateStr}</p>
+          <p className="subtitle">Édition du {dateLabel}</p>
         </header>
 
         <ModeToggle general={general} dev={dev} />
