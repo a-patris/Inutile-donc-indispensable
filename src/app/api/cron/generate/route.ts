@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebaseAdmin";
 import { generateDailyPayload } from "@/lib/openai";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 function getParisDateString(date: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Paris",

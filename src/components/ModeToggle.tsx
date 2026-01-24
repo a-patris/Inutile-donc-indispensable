@@ -59,18 +59,16 @@ export default function ModeToggle({ general, dev }: Props) {
         <button
           onClick={() => setMode("general")}
           aria-pressed={mode === "general"}
-          className={`segmentedButton ${
-            mode === "general" ? "segmentedButtonActive" : ""
-          }`}
+          className={`segmentedButton ${mode === "general" ? "segmentedButtonActive" : ""
+            }`}
         >
           Grand public
         </button>
         <button
           onClick={() => setMode("dev")}
           aria-pressed={mode === "dev"}
-          className={`segmentedButton ${
-            mode === "dev" ? "segmentedButtonActive" : ""
-          }`}
+          className={`segmentedButton ${mode === "dev" ? "segmentedButtonActive" : ""
+            }`}
         >
           Mode Dev 🤓
         </button>
@@ -101,14 +99,14 @@ export default function ModeToggle({ general, dev }: Props) {
             <h2 className="sectionTitle">Info inutile</h2>
             <p className="sectionText">{data.fact}</p>
             <p className="sourceWrap">
-              <a
+              {/* <a
                 href={data.sourceUrl}
                 target="_blank"
                 rel="noreferrer noopener"
                 className="sourceLink"
-              >
-                Source
-              </a>
+              > */}
+              Source moi-même 🤓
+              {/* </a> */}
             </p>
           </div>
         </>

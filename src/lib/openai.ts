@@ -1,12 +1,16 @@
 import OpenAI from "openai";
 
-const apiKey = process.env.OPENAI_API_KEY;
+let client: OpenAI | null = null;
 
-if (!apiKey) {
-  throw new Error("Missing OPENAI_API_KEY environment variable");
+function getOpenAI(): OpenAI {
+  if (client) return client;
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Missing OPENAI_API_KEY environment variable");
+  }
+  client = new OpenAI({ apiKey });
+  return client;
 }
-
-export const openai = new OpenAI({ apiKey });
 
 export type DailyPayload = {
   joke: string;
@@ -35,6 +39,7 @@ Réponds UNIQUEMENT avec un objet JSON au format exact suivant (sans markdown, s
 
 Le champ sourceUrl est OBLIGATOIRE et doit être une URL valide commençant par http:// ou https://.`;
 
+  const openai = getOpenAI();
   const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     temperature: 0.8,
