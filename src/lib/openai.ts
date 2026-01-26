@@ -19,9 +19,16 @@ export type DailyPayload = {
 };
 
 export async function generateDailyPayload(
-  mode: "general" | "dev"
+  mode: "general" | "dev",
+  recentFacts: string[]
 ): Promise<DailyPayload> {
   const systemPrompt = `Tu es un générateur de contenu JSON strict. Tu dois répondre UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après.`;
+
+  const dedupeContext = recentFacts.length
+    ? `\nÉvite strictement les faits suivants (ne pas reformuler) :\n- ${recentFacts.join(
+        "\n- "
+      )}\n`
+    : "";
 
   const userPrompt = `Mode: ${mode === "general" ? "Grand public" : "Développeur (dev)"}
 
@@ -37,7 +44,7 @@ Réponds UNIQUEMENT avec un objet JSON au format exact suivant (sans markdown, s
   "sourceUrl": "https://exemple.com/source"
 }
 
-Le champ sourceUrl est OBLIGATOIRE et doit être une URL valide commençant par http:// ou https://.`;
+Le champ sourceUrl est OBLIGATOIRE et doit être une URL valide commençant par http:// ou https://${dedupeContext}`;
 
   const openai = getOpenAI();
   const response = await openai.chat.completions.create({

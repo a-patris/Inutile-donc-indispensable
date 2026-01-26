@@ -16,7 +16,8 @@ function getParisDateString(date: Date = new Date()): string {
 
 async function ensureDailyDoc(
   mode: "general" | "dev",
-  dateStr: string
+  dateStr: string,
+  recentFacts: string[]
 ): Promise<{ id: string; created: boolean }> {
   const docId = `${dateStr}_${mode}`;
   const docRef = db.collection("daily").doc(docId);
@@ -31,11 +32,19 @@ async function ensureDailyDoc(
   let lastError: Error | null = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const payload = await generateDailyPayload(mode);
+      const payload = await generateDailyPayload(mode, recentFacts);
 
       // Double vérification que sourceUrl existe
       if (!payload.sourceUrl) {
         throw new Error("sourceUrl is missing from OpenAI response");
+      }
+
+      const normalizedFact = payload.fact.trim().toLowerCase();
+      const recentNormalized = new Set(
+        recentFacts.map((fact) => fact.trim().toLowerCase())
+      );
+      if (recentNormalized.has(normalizedFact)) {
+        throw new Error("Duplicate fact detected");
       }
 
       await docRef.set({
@@ -71,6 +80,19 @@ function getAuthSecret(request: NextRequest) {
   return token || null;
 }
 
+async function getRecentFacts(mode: "general" | "dev", limit = 14) {
+  const snapshot = await db
+    .collection("daily")
+    .where("mode", "==", mode)
+    .orderBy("date", "desc")
+    .limit(limit)
+    .get();
+
+  return snapshot.docs
+    .map((doc) => doc.data()?.fact)
+    .filter((fact): fact is string => typeof fact === "string" && fact.trim());
+}
+
 async function handleCron(request: NextRequest) {
   const expectedSecret = process.env.CRON_SECRET;
   const providedSecret = getAuthSecret(request);
@@ -88,10 +110,14 @@ async function handleCron(request: NextRequest) {
 
   try {
     const dateStr = getParisDateString();
+    const [generalFacts, devFacts] = await Promise.all([
+      getRecentFacts("general"),
+      getRecentFacts("dev"),
+    ]);
 
     const [generalResult, devResult] = await Promise.all([
-      ensureDailyDoc("general", dateStr),
-      ensureDailyDoc("dev", dateStr),
+      ensureDailyDoc("general", dateStr, generalFacts),
+      ensureDailyDoc("dev", dateStr, devFacts),
     ]);
 
     return NextResponse.json({
