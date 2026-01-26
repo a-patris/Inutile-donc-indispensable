@@ -31,9 +31,10 @@ export async function generateDailyPayload(
     mode === "dark"
       ? [
           baseSystemPrompt,
-          "Style attendu: humour noir léger, sans être choquant.",
+          "Style attendu: humour noir assumé (macabre léger), plus grinçant.",
           "Interdit: haine, harcèlement, propos discriminatoires, sexualité explicite, gore, violence graphique, suicide ou auto-mutilation.",
           "Ne pas se moquer des handicaps, des maladies ou des tragédies réelles.",
+          "OK: ironie noire, fatalisme, absurdité morbide, sans viser des victimes réelles.",
         ].join(" ")
       : [
           baseSystemPrompt,
@@ -57,7 +58,7 @@ Génère :
 
 Contraintes :
 - Si mode "general" ou "dev": autorise devinettes simples et clichés.
-- Si mode "dark": humour noir léger, sans être choquant.
+- Si mode "dark": humour noir plus marqué (macabre léger), sans être choquant.
 - Ton: bon enfant, pas de vulgarité.
 - Interdit la blague : "Pourquoi les plongeurs plongent-ils toujours en arrière et jamais en avant ? Parce que sinon ils tombent dans le bateau !"
 - Évite les blagues qui ne fonctionnent qu'en anglais (jeu de mots intraduisible).
