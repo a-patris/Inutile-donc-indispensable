@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 type Props = {
-  mode: "general" | "dev";
+  mode: "general" | "dev" | "dark";
 };
 
 const COPY = {
@@ -11,6 +11,8 @@ const COPY = {
     "Parce qu’une blague et une info inutile suffisent parfois à améliorer la journée.",
   dev:
     "Parce qu’un fait inutile et un clin d’œil tech peuvent rendre le quotidien plus léger.",
+  dark:
+    "Parce qu’un humour un peu noir (mais léger) aide parfois à relativiser.",
 };
 
 export default function WhyButton({ mode }: Props) {

@@ -35,7 +35,7 @@ function getParisDateLabel(date: Date = new Date()): string {
 }
 
 async function getDailyData(
-  mode: "general" | "dev",
+  mode: "general" | "dev" | "dark",
   dateStr: string
 ): Promise<DailyData> {
   try {
@@ -72,9 +72,10 @@ async function getDailyData(
 export default async function HomePage() {
   const dateKey = getParisDateKey();
   const dateLabel = getParisDateLabel();
-  const [general, dev] = await Promise.all([
+  const [general, dev, dark] = await Promise.all([
     getDailyData("general", dateKey),
     getDailyData("dev", dateKey),
+    getDailyData("dark", dateKey),
   ]);
 
   return (
@@ -85,7 +86,7 @@ export default async function HomePage() {
           <p className="subtitle">Édition du {dateLabel}</p>
         </header>
 
-        <ModeToggle general={general} dev={dev} />
+        <ModeToggle general={general} dev={dev} dark={dark} />
 
         <footer className="footer">
           Mis à jour chaque jour à 06:05 (Paris)

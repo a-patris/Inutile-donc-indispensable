@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import WhyButton from "@/components/WhyButton";
 
 type DailyData = {
@@ -13,17 +13,23 @@ type DailyData = {
 type Props = {
   general: DailyData;
   dev: DailyData;
+  dark: DailyData;
 };
 
-export default function ModeToggle({ general, dev }: Props) {
-  const [mode, setMode] = useState<"general" | "dev">("general");
-  const data = mode === "general" ? general : dev;
+export default function ModeToggle({ general, dev, dark }: Props) {
+  const [mode, setMode] = useState<"general" | "dev" | "dark">("general");
+  const data =
+    mode === "general" ? general : mode === "dev" ? dev : dark;
   const isReady = data.status === "ok" && data.joke && data.fact;
   const isLoading = data.status === "loading";
   const isError = data.status === "error";
   const statusMessage = "Contenu en cours de préparation…";
   const errorMessage =
     "Pas encore de contenu pour aujourd’hui. Réessaie un peu plus tard.";
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = mode === "dark" ? "dark" : "light";
+  }, [mode]);
 
   const handleShare = async () => {
     if (!isReady) return;
@@ -72,6 +78,14 @@ export default function ModeToggle({ general, dev }: Props) {
             }`}
         >
           Mode Dev 🤓
+        </button>
+        <button
+          onClick={() => setMode("dark")}
+          aria-pressed={mode === "dark"}
+          className={`segmentedButton ${mode === "dark" ? "segmentedButtonActive" : ""
+            }`}
+        >
+          Dark mode 🌙
         </button>
       </div>
 

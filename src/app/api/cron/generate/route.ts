@@ -15,17 +15,18 @@ function getParisDateString(date: Date = new Date()): string {
 }
 
 async function ensureDailyDoc(
-  mode: "general" | "dev",
+  mode: "general" | "dev" | "dark",
   dateStr: string,
   recentFacts: string[]
-): Promise<{ id: string; created: boolean }> {
+): Promise<{ id: string; created: boolean; fact: string }> {
   const docId = `${dateStr}_${mode}`;
   const docRef = db.collection("daily").doc(docId);
 
   // Vérifier si le document existe déjà
   const docSnap = await docRef.get();
   if (docSnap.exists) {
-    return { id: docId, created: false };
+    const data = docSnap.data();
+    return { id: docId, created: false, fact: (data?.fact as string) || "" };
   }
 
   // Générer le contenu avec retry si sourceUrl manquante
@@ -56,7 +57,7 @@ async function ensureDailyDoc(
         createdAt: new Date(),
       });
 
-      return { id: docId, created: true };
+      return { id: docId, created: true, fact: payload.fact };
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       // Si c'est le dernier essai, on lance l'erreur
@@ -80,7 +81,10 @@ function getAuthSecret(request: NextRequest) {
   return token || null;
 }
 
-async function getRecentFacts(mode: "general" | "dev", limit = 14) {
+async function getRecentFacts(
+  mode: "general" | "dev" | "dark",
+  limit = 14
+) {
   const snapshot = await db
     .collection("daily")
     .where("mode", "==", mode)
@@ -113,14 +117,28 @@ async function handleCron(request: NextRequest) {
 
   try {
     const dateStr = getParisDateString();
-    const [generalFacts, devFacts] = await Promise.all([
+    const [generalFacts, devFacts, darkFacts] = await Promise.all([
       getRecentFacts("general"),
       getRecentFacts("dev"),
+      getRecentFacts("dark"),
     ]);
+    const combinedFacts = Array.from(
+      new Set([...generalFacts, ...devFacts, ...darkFacts])
+    );
 
-    const [generalResult, devResult] = await Promise.all([
-      ensureDailyDoc("general", dateStr, generalFacts),
-      ensureDailyDoc("dev", dateStr, devFacts),
+    const generalResult = await ensureDailyDoc(
+      "general",
+      dateStr,
+      combinedFacts
+    );
+    const devResult = await ensureDailyDoc("dev", dateStr, [
+      ...combinedFacts,
+      generalResult.fact,
+    ]);
+    const darkResult = await ensureDailyDoc("dark", dateStr, [
+      ...combinedFacts,
+      generalResult.fact,
+      devResult.fact,
     ]);
 
     return NextResponse.json({
@@ -129,6 +147,7 @@ async function handleCron(request: NextRequest) {
       results: {
         general: generalResult,
         dev: devResult,
+        dark: darkResult,
       },
     });
   } catch (error) {
