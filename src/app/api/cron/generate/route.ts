@@ -60,9 +60,20 @@ async function ensureDailyDoc(
   throw lastError || new Error("Failed to generate daily payload");
 }
 
-export async function POST(request: NextRequest) {
-  const cronSecret = request.headers.get("X-CRON-SECRET");
+function getAuthSecret(request: NextRequest) {
+  const headerSecret = request.headers.get("X-CRON-SECRET");
+  if (headerSecret) return headerSecret;
+
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader) return null;
+  const [scheme, token] = authHeader.split(" ");
+  if (scheme?.toLowerCase() !== "bearer") return null;
+  return token || null;
+}
+
+async function handleCron(request: NextRequest) {
   const expectedSecret = process.env.CRON_SECRET;
+  const providedSecret = getAuthSecret(request);
 
   if (!expectedSecret) {
     return NextResponse.json(
@@ -71,7 +82,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!cronSecret || cronSecret !== expectedSecret) {
+  if (!providedSecret || providedSecret !== expectedSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -101,4 +112,12 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function GET(request: NextRequest) {
+  return handleCron(request);
+}
+
+export async function POST(request: NextRequest) {
+  return handleCron(request);
 }
