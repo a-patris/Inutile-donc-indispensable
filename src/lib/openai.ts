@@ -22,7 +22,11 @@ export async function generateDailyPayload(
   mode: "general" | "dev",
   recentFacts: string[]
 ): Promise<DailyPayload> {
-  const systemPrompt = `Tu es un générateur de contenu JSON strict. Tu dois répondre UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après.`;
+  const systemPrompt = [
+    "Tu es un générateur de contenu JSON strict.",
+    "Tu dois répondre UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après.",
+    "Style attendu: humoristique simple, accessible, assumant les clichés.",
+  ].join(" ");
 
   const dedupeContext = recentFacts.length
     ? `\nÉvite strictement les faits suivants (ne pas reformuler) :\n- ${recentFacts.join(
@@ -30,12 +34,20 @@ export async function generateDailyPayload(
       )}\n`
     : "";
 
-  const userPrompt = `Mode: ${mode === "general" ? "Grand public" : "Développeur (dev)"}
+  const userPrompt = `Mode: ${
+    mode === "general" ? "Grand public" : "Développeur (dev)"
+  }
 
 Génère :
-1. Une blague courte (1-2 phrases maximum)
-2. Une information inutile mais vraie (1 phrase)
-3. Une URL source valide pour l'information (doit être un vrai lien)
+1. Une blague courte (1-2 phrases max), volontairement simple, avec jeux de mots évidents ou clichés assumés.
+2. Une information inutile mais vraie (1 phrase), même si elle est assez évidente.
+3. Une URL source valide (doit être un vrai lien) qui confirme l'information.
+
+Contraintes :
+- Autorise les devinettes simples (type "Pourquoi... ? Parce que...").
+- Autorise les jeux de mots faciles et les clichés.
+- Ton: bon enfant, pas de vulgarité.
+${dedupeContext}
 
 Réponds UNIQUEMENT avec un objet JSON au format exact suivant (sans markdown, sans code block) :
 {
@@ -44,7 +56,7 @@ Réponds UNIQUEMENT avec un objet JSON au format exact suivant (sans markdown, s
   "sourceUrl": "https://exemple.com/source"
 }
 
-Le champ sourceUrl est OBLIGATOIRE et doit être une URL valide commençant par http:// ou https://${dedupeContext}`;
+Le champ sourceUrl est OBLIGATOIRE et doit être une URL valide commençant par http:// ou https://.`;
 
   const openai = getOpenAI();
   const response = await openai.chat.completions.create({
