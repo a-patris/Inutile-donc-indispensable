@@ -47,6 +47,7 @@ Contraintes :
 - Autorise les devinettes simples (type "Pourquoi... ? Parce que...").
 - Autorise les jeux de mots faciles et les clichés.
 - Ton: bon enfant, pas de vulgarité.
+- Interdit la blague : "Pourquoi les plongeurs plongent-ils toujours en arrière et jamais en avant ? Parce que sinon ils tombent dans le bateau !"
 ${dedupeContext}
 
 Réponds UNIQUEMENT avec un objet JSON au format exact suivant (sans markdown, sans code block) :
