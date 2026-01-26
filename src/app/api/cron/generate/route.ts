@@ -90,7 +90,10 @@ async function getRecentFacts(mode: "general" | "dev", limit = 14) {
 
   return snapshot.docs
     .map((doc) => doc.data()?.fact)
-    .filter((fact): fact is string => typeof fact === "string" && fact.trim());
+    .filter(
+      (fact): fact is string =>
+        typeof fact === "string" && fact.trim().length > 0
+    );
 }
 
 async function handleCron(request: NextRequest) {
