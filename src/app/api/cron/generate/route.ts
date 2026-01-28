@@ -17,8 +17,9 @@ function getParisDateString(date: Date = new Date()): string {
 async function ensureDailyDoc(
   mode: "general" | "dev" | "dark",
   dateStr: string,
-  recentFacts: string[]
-): Promise<{ id: string; created: boolean; fact: string }> {
+  recentFacts: string[],
+  recentJokes: string[]
+): Promise<{ id: string; created: boolean; fact: string; joke: string }> {
   const docId = `${dateStr}_${mode}`;
   const docRef = db.collection("daily").doc(docId);
 
@@ -26,14 +27,19 @@ async function ensureDailyDoc(
   const docSnap = await docRef.get();
   if (docSnap.exists) {
     const data = docSnap.data();
-    return { id: docId, created: false, fact: (data?.fact as string) || "" };
+    return {
+      id: docId,
+      created: false,
+      fact: (data?.fact as string) || "",
+      joke: (data?.joke as string) || "",
+    };
   }
 
   // Générer le contenu avec retry si sourceUrl manquante
   let lastError: Error | null = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const payload = await generateDailyPayload(mode, recentFacts);
+      const payload = await generateDailyPayload(mode, recentFacts, recentJokes);
 
       // Double vérification que sourceUrl existe
       if (!payload.sourceUrl) {
@@ -47,6 +53,13 @@ async function ensureDailyDoc(
       if (recentNormalized.has(normalizedFact)) {
         throw new Error("Duplicate fact detected");
       }
+      const normalizedJoke = payload.joke.trim().toLowerCase();
+      const recentJokesNormalized = new Set(
+        recentJokes.map((joke) => joke.trim().toLowerCase())
+      );
+      if (recentJokesNormalized.has(normalizedJoke)) {
+        throw new Error("Duplicate joke detected");
+      }
 
       await docRef.set({
         date: dateStr,
@@ -57,7 +70,12 @@ async function ensureDailyDoc(
         createdAt: new Date(),
       });
 
-      return { id: docId, created: true, fact: payload.fact };
+      return {
+        id: docId,
+        created: true,
+        fact: payload.fact,
+        joke: payload.joke,
+      };
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       // Si c'est le dernier essai, on lance l'erreur
@@ -100,6 +118,25 @@ async function getRecentFacts(
     );
 }
 
+async function getRecentJokes(
+  mode: "general" | "dev" | "dark",
+  limit = 14
+) {
+  const snapshot = await db
+    .collection("daily")
+    .where("mode", "==", mode)
+    .orderBy("date", "desc")
+    .limit(limit)
+    .get();
+
+  return snapshot.docs
+    .map((doc) => doc.data()?.joke)
+    .filter(
+      (joke): joke is string =>
+        typeof joke === "string" && joke.trim().length > 0
+    );
+}
+
 async function handleCron(request: NextRequest) {
   const expectedSecret = process.env.CRON_SECRET;
   const providedSecret = getAuthSecret(request);
@@ -117,28 +154,49 @@ async function handleCron(request: NextRequest) {
 
   try {
     const dateStr = getParisDateString();
-    const [generalFacts, devFacts, darkFacts] = await Promise.all([
+    const [
+      generalFacts,
+      devFacts,
+      darkFacts,
+      generalJokes,
+      devJokes,
+      darkJokes,
+    ] = await Promise.all([
       getRecentFacts("general"),
       getRecentFacts("dev"),
       getRecentFacts("dark"),
+      getRecentJokes("general"),
+      getRecentJokes("dev"),
+      getRecentJokes("dark"),
     ]);
     const combinedFacts = Array.from(
       new Set([...generalFacts, ...devFacts, ...darkFacts])
+    );
+    const combinedJokes = Array.from(
+      new Set([...generalJokes, ...devJokes, ...darkJokes])
     );
 
     const generalResult = await ensureDailyDoc(
       "general",
       dateStr,
-      combinedFacts
+      combinedFacts,
+      combinedJokes
     );
     const devResult = await ensureDailyDoc("dev", dateStr, [
       ...combinedFacts,
       generalResult.fact,
+    ], [
+      ...combinedJokes,
+      generalResult.joke,
     ]);
     const darkResult = await ensureDailyDoc("dark", dateStr, [
       ...combinedFacts,
       generalResult.fact,
       devResult.fact,
+    ], [
+      ...combinedJokes,
+      generalResult.joke,
+      devResult.joke,
     ]);
 
     return NextResponse.json({

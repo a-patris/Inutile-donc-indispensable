@@ -20,7 +20,8 @@ export type DailyPayload = {
 
 export async function generateDailyPayload(
   mode: "general" | "dev" | "dark",
-  recentFacts: string[]
+  recentFacts: string[],
+  recentJokes: string[]
 ): Promise<DailyPayload> {
   const baseSystemPrompt = [
     "Tu es un générateur de contenu JSON strict.",
@@ -45,6 +46,11 @@ export async function generateDailyPayload(
         "\n- "
       )}\n`
     : "";
+  const dedupeJokesContext = recentJokes.length
+    ? `\nÉvite strictement les blagues suivantes (ne pas reformuler) :\n- ${recentJokes.join(
+        "\n- "
+      )}\n`
+    : "";
 
   const modeLabel =
     mode === "general" ? "Grand public" : mode === "dev" ? "Développeur (dev)" : "Dark mode";
@@ -58,12 +64,12 @@ Génère :
 
 Contraintes :
 - Si mode "general" ou "dev": autorise devinettes simples et clichés.
-- Si mode "dark": humour noir plus marqué (macabre léger), sans être choquant.
+- Si mode "dark": humour noir plus marqué (macabre léger).
 - Ton: bon enfant, pas de vulgarité.
 - Interdit la blague : "Pourquoi les plongeurs plongent-ils toujours en arrière et jamais en avant ? Parce que sinon ils tombent dans le bateau !"
 - Évite les blagues qui ne fonctionnent qu'en anglais (jeu de mots intraduisible).
 - Les facts "general", "dev" et "dark" du même jour doivent être strictement différentes.
-${dedupeContext}
+${dedupeContext}${dedupeJokesContext}
 
 Réponds UNIQUEMENT avec un objet JSON au format exact suivant (sans markdown, sans code block) :
 {
